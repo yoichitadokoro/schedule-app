@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <title>予定編集</title>
+    <style>
+      .test1{background-color:cyan;}
+      .fullwidth{width:100%;}
+      .width10{width:10%;}
+      .th01{vertical-align:middle;}
+    </style>
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+<div class="modal-dialog">
+  <div class="modal-content">
+  <form action="" method="POST" id="edit_blow">
+    <div class="modal-header">
+      <h5 class="modal-title" id="exampleModalLabel">BLOW予定編集</h5>
+      <button v-show="pstep>0" type="button" class="close" data-dismiss="modal" aria-label="閉じる" onclick="window.close()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <button v-show="pstep===0" v-on:click="del" type="button" class="btn btn-primary">削除</button>
+    </div>
+    <div class="modal-body">
+<!--      {{pstep}}
+       <ul v-for="(machine,i) in res">
+         <li>{{machine.fullname}}</li>
+       </ul> -->
+     <div v-show="pstep===0">
+     <div class="form-row">
+       <div class="form-group col-sm-6">
+       <label for="id_blow_machine">ブロー機:</label>
+        <select v-model="blowmachine" @change="dataChanged" name="blow_machine" class="form-control" id="id_blow_machine">
+         <option v-for="(machine,i) in res" :key="machine.odr" v-bind:value="machine.idm">{{machine.fullname}}</option>
+        </select>
+<!--        <small>{{blowmachine}}</small> -->
+      </div>
+       <div class="form-group col-sm-6">
+         <label for="id_name">担当:</label>
+         <input v-model="name" type="text" name="name" class="form-control" placeholder="担当者名" maxlength="30" required id="id_name">
+<!--         <small>{{name}}</small> -->
+       </div>
+     </div>
+     <div class="form-row">
+     <div class="form-group col-sm-12">
+       <label for="id_summary">案件名:</label>
+       <input v-model="summary" type="text" name="summary" class="form-control" placeholder="案件名" maxlength="50" required id="id_summary">
+<!--       <small>{{summary}}</small> -->
+     </div>
+    </div>
+     <div class="form-row">
+     <div class="form-group col-sm-6">
+       <label for="id_PFgeom">PF形状数:</label>
+       <input v-model="PFgeom" type="number" name="PFgeom" class="form-control" required id="id_PFgeom">
+<!--       <small>{{PFgeom}}</small>  -->
+     </div>
+     <div class="form-group col-sm-6">
+       <label for="id_PFnum">必要本数:</label>
+       <input v-model="PFnum"type="number" name="PFnum" class="form-control" required id="id_PFnum">
+<!--       <small>{{PFnum}}</small> -->
+     </div>
+    </div>
+     <div class="form-row">
+     <div class="form-group col-sm-6">
+       <label for="id_start_date">開始:</label>
+       <input v-model="start_date" @change="dataChanged" type="date" class="form-control" name="start_date">
+<!--       <small>{{start_date}}</small> -->
+     </div>
+     <div class="form-group col-sm-6">
+       <label for="id_end_date">終了:</label>
+       <input v-model="end_date" @change="dataChanged" type="date" class="form-control" name="end_date">
+<!--       <small>{{end_date}}</small> -->
+      </div>
+     </div>
+     <div class="form-row">
+      <div class="form-group col-sm-6">
+       <div class="form-check form-check-inline">
+         <input v-model="plamold" type="checkbox" name="plamold" class="form-check-input" id="id_plamold">
+        樹脂型
+<!--        <small>{{plamold}}</small> -->
+       </div>
+      </div>
+      <div class="form-group col-sm-6">
+        <label for="id_plantPF">工場PF:</label>
+         <input v-model="plantPF"type="text" name="plantPF" class="form-control" placeholder="工場PF" maxlength="5" id="id_plantPF">
+<!--         <small>{{plantPF}}</small> -->
+      </div>
+     </div>
+     <div class="form-row">
+      <div class="form-group col-sm-6">
+        <label for="id_color">色:</label>
+         <input v-model="color" type="color" name="color">
+<!--         <small>{{color}}</small>   -->
+      </div>
+     </div>
+     <div v-show="err.length > 0" class="alert alert-danger" role="alert">
+       <p>エラーがあります</p>
+       <ul><li v-for="er in err">{{er}}</li></ul>
+       <p>修正が必要です</p>
+     </div>
+    </div>
+    <div v-show="pstep===1">
+      <h5>以下の内容で登録します</h5>
+      <table class="table table-bordered">
+        <tr><td>ブロー機</td><td>{{m_name.fullname}}</td></tr>
+        <tr><td>担当者</td><td>{{name}}</td></tr>
+        <tr><td>案件</td><td>{{summary}}</td></tr>
+        <tr><td>PF形状</td><td>{{PFgeom}}</td></tr>
+        <tr><td>必要本数</td><td>{{PFnum}}</td></tr>
+        <tr><td>開始</td><td>{{start_date}}</td></tr>
+        <tr><td>終了</td><td>{{end_date}}</td></tr>
+        <tr v-show="plamold===true"><td>樹脂型</td><td>使用</td></tr>
+        <tr v-show="plantPF!=''"><td>工場PF</td><td>{{plantPF}}</td></tr>
+      </table>
+      <div v-show="warn.length > 0" class="alert alert-warning" role="alert">
+        <p>競合する予定があります</p>
+        <ul>
+          <li v-for="wa in warn">{{wa.name}}-{{wa.summary}}({{wa.start_date}}〜{{wa.end_date}})</li>
+        </ul>
+        <p>構わなければそのまま登録してください</p>
+      </div>
+    </div>
+    <div v-show="pstep===2">
+      <h3 class="text-center">完了しました</h3>
+    </div>
+  </div>
+    <div class="modal-footer">
+      <button v-show="pstep<=1"type="button" class="btn btn-secondary" onclick="window.close()">キャンセル</button>
+      <button v-show="pstep===0" v-on:click="entry"  type="button" class="btn btn-primary" name="next" value="newblowconfirm">エントリー</button>
+      <button v-show="pstep===1" v-on:click="backp" type="button" class="btn btn-secondary">戻る</button>
+      <button v-show="pstep===1" v-on:click="update"  type="button" class="btn btn-primary" name="register" value="newblowregister">登録</button>
+      <button v-show="pstep===2"type="button"class="btn btn-primary" id="button_success">閉じる</button>
+    </div><!-- /.modal-footer -->
+  </form>
+  </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+
+<footer>
+    <p class="text-center small">© All rights reserved by TSK & MPG.</p>
+</footer>
+
+    <!-- オプションのJavaScript -->
+    <!-- 最初にjQuery、次にPopper.js、次にBootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      jQuery(function($){
+        $('#button_success').on("click", function() {
+          window.opener.postMessage("message");
+          window.close();
+        });
+      });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="js/editblow.js"></script>
+</body>
+</html>

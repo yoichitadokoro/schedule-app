@@ -1,0 +1,17 @@
+{
+  "name": "schedule-app",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "author": "YoichiTadokoro",
+  "license": "MIT",
+  "devDependencies": {
+    "date-utils": "^1.2.21",
+    "electron": "11.0.0",
+    "electron-builder": "^22.9.1",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "pdfmake": "^0.1.69",
+    "sqlite3": "^5.0.0",
+    "vue": "^2.6.12"
+  }
+}

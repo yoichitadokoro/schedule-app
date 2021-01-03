@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.css" rel="stylesheet" >
+    <title>試作予定表</title>
+    <style>
+      .test1{background-color:cyan;}
+      .fullwidth{width:100%;}
+      .width10{width:10%;}
+      .th01{vertical-align:middle;}
+      .m_name{height:100%;text-align:left;border:1px}
+      .m_summary{height:100%;text-align:left;border:1px}
+      .clearfix{display:flex;flex-wrap:wrap;justify-content:space-around;align-items:left;border:1px}
+      .table-hover tbody tr:hover td {background:azure;}
+    </style>
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<!-- メニュー -->
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+   <a class="navbar-brand" href="main.html" onclick="button_home()">成形試作予定表</a>
+   <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="ナビゲーションの切替">
+    <span class="navbar-toggler-icon"></span>
+   </button>
+   <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="main.html" onclick="button_home()">ホーム <span class="sr-only">(現位置)</span></a>
+      </li>
+      <li class="nav-item dropdown">
+       <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">新規予定</a>
+       <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+         <a class="dropdown-item" href="#" id="newblow1">BLOW</a>
+         <a class="dropdown-item" href="#" id="newinj1">INJ</a>
+       </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="modal" href="#editModal">予定編集</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="printPDF()">予定表印刷</a>
+      </li>
+    </ul>
+    <span class="navbar-text">
+       <a class="nav-link" href="staff.html">管理ページ</a>
+    </span>
+   </div>
+  </nav>
+</header>
+<div id="datenavtab">
+<!-- タブ選択 -->
+<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+  <li class="nav-item" role="presentation">
+   <a v-on:click="tabs=0" class="nav-link active" id="pills-blowinj-tab" data-toggle="pill" href="#pills-blowinj" aria-controls="pills-blowinj" aria-selected="true" role="tab">BLOW&INJ</a>
+  </li>
+  <li class="nav-item" role="presentation">
+   <a v-on:click="tabs=1" class="nav-link" id="pills-blow-tab" data-toggle="pill" href="#pills-blow" aria-controls="pills-blow" aria-selected="false" role="tab">BLOW</a>
+  </li>
+  <li class="nav-item" role="presentation">
+   <a v-on:click="tabs=2" class="nav-link" id="pills-inj-tab" data-toggle="pill" href="#pills-inj" aria-controls="pills-inj" aria-selected="false" role="tab">INJ</a>
+  </li>
+</ul>
+<!-- ページネーション -->
+<nav aria-label="Page navigation (date)" id="datenav">
+ <ul class="pagination justify-content-between">
+  <li class="page-item ">
+    <a class="page-link" v-on:click="href_prev" href="main.html">&laquo;前月</a>
+  </li>
+  <li class="page-item">
+    <a class="page-link" data-toggle="modal" data-target="#dateinputModal" href="#dateinputModal" @click="dateinputModal">
+      {{context.year}}年{{context.month}}月
+    </a></li>
+  <li class="page-item">
+    <a class="page-link" v-on:click="href_next" href="main.html">次月&raquo;</a>
+  </li>
+ </ul>
+</nav>
+<!-- 年月日入力モーダル -->
+<div class="modal fade" id="dateinputModal" tabindex="-1" role="dialog" aria-labelledby="dateNavi">
+ <div class="modal-dialog">
+   <div class="modal-content">
+     <form name="form_dateChange" id="form_dateChange">
+     <div class="modal-header">
+       <h5 class="modal-title" id="exampleModalLabel">開く予定表の年月を入力してください</h5>
+       <button type="button" class="close" data-dismiss="modal" aria-label="閉じる"tabindex="-1">
+         <span aria-hidden="true">&times;</span>
+       </button>
+     </div>
+     <div class="modal-body">
+       <div class="form-row">
+       <div class="col">
+          <input v-model="yy" type="text" class="form-control" placeholder="年" name="year_change" id="year_change" ref="year">
+        </div>
+        <div class="col">
+          <input v-model="mm" type="text" class="form-control" placeholder="月" name="month_change" id="month_change" ref="month">
+        </div>
+       </div>
+     </div>
+     <div class="modal-footer">
+       <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+       <button v-on:click="dchange" type="button" class="btn btn-primary" name="button_dateChange" id="button_dateChange">決定</button>
+     </div> <!-- /.modal-footer -->
+     </form>
+   </div><!-- /.modal-content -->
+ </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+</div>
+<!-- tab content -->
+<div id="maincontent">
+<div class="tab-content" id="pills-tabContent">
+  <!--BLOW INJ tab-->
+  <div class="tab-pane fade show active" id="pills-blowinj" role="tabpanel" aria-labelledby="pills-blowinj-tab">
+    <div class="container-fluid small">
+      <div class="row">
+        <!-- INJ予定一覧 -->
+        <div class="col-lg-5 d-block" >
+          <div class="row">
+            <div class="col-lg-12 table-responsive pl-0 pr-0 ">
+              <h5 class="h5 text-center">
+                INJ予定一覧
+                <a href="newinj.html"class="text-dark" id="newinj2"data-toggle="tooltip" data-placement="top" title="予定を追加" >
+                  <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+                </a>
+              </h5>
+            <table class="table table-sm fullwidth table-bordered table-hover">
+             <thead class="thead-light">
+              <tr>
+                <th scope="col">マシン</th>
+                <th scope="col">No.</th>
+                <th scope="col">担当</th>
+                <th scope="col">案件</th>
+                <th scope="col">開始</th>
+                <th scope="col">終了</th>
+              </tr>
+             </thead>
+             <tbody>
+                 <tr v-for="(bl,i) in injlist" :class="bl.aclass" @click="newinj_list(i)">
+                   <td scope="row" class="text-dark"
+                       :rowspan="bl.rows"
+                       v-if="!i? true:injlist[i-1].machine==bl.machine? '':true"
+                       v-text="bl.machine"></td>
+                   <td :style="{backgroundColor:bl.color}">
+                     <a v-on:click="edit_injs(bl.id)" href="editinj.html" :class="bl.aclass">{{bl.number}}</a>
+                   </td>
+                   <td><a v-on:click="edit_injs(bl.id)" href="editinj.html" :class="bl.aclass">{{bl.name}}</a></td>
+                   <td><a v-on:click="edit_injs(bl.id)" href="editinj.html" :class="bl.aclass">{{bl.summary}}</a></td>
+                   <td>{{bl.start_date}}</td>
+                   <td>{{bl.end_date}}</td>
+                 </tr>
+             </tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+        <!-- BLOW予定一覧 -->
+        <div class="col-lg-6 d-block" >
+          <div class="row">
+            <div class="col-lg-12 table-responsive pl-0 pr-0 " >
+              <h5 class="h5 text-center">BLOW予定一覧
+                <a href="newblow.html"class="text-dark" id="newblow2"data-toggle="tooltip" data-placement="top" title="予定を追加" >
+                  <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+                </a>
+              </h5>
+              <table class="table table-sm fullwidth table-bordered table-hover">
+               <thead class="thead-dark">
+                <tr>
+                  <th scope="col">マシン</th>
+                  <th scope="col">No.</th>
+                  <th scope="col">担当</th>
+                  <th scope="col">案件</th>
+                  <th scope="col">PF形状</th>
+                  <th scope="col">必要数</th>
+                  <th scope="col">開始</th>
+                  <th scope="col">終了</th>
+                  <th scope="col">樹脂型</th>
+                  <th scope="col">工場PF</th>
+                </tr>
+               </thead>
+               <tbody>
+                   <tr v-for="(bl,i) in blowlist" :class="bl.aclass"@click="newblow_list(i)">
+                     <td scope="row" class="text-dark"
+                         :rowspan="bl.rows"
+                         v-if="!i? true:blowlist[i-1].machine==bl.machine? '':true"
+                         v-text="bl.machine"></td>
+                     <td :style="{backgroundColor:bl.color}">
+                       <a v-on:click="edit_blows(bl.id)" href="editblow.html" :class="bl.aclass">{{bl.number}}</a>
+                     </td>
+                     <td><a v-on:click="edit_blows(bl.id)" href="editblow.html" :class="bl.aclass">{{bl.name}}</a></td>
+                     <td><a v-on:click="edit_blows(bl.id)" href="editblow.html" :class="bl.aclass">{{bl.summary}}</a></td>
+                     <td>{{bl.PFgeom}}</td>
+                     <td>{{bl.PFnum}}</td>
+                     <td>{{bl.start_date}}</td>
+                     <td>{{bl.end_date}}</td>
+                     <td>{{bl.plamold}}</td>
+                     <td>{{bl.plantPF}}</td>
+                   </tr>
+               </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- BLOW&INJ予定表 -->
+        <div class="col-lg-12" >
+          <div class="row">
+          <div class="col-lg-12 table-responsive pl-0 pr-0 " >
+           <h5 class="h5 text-center">INJ&BLOW予定表
+               <span class="dropdown-toggle text-dark" role="button" id="dropdownMenuLink" data-toggle="dropdown" >
+                 <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+               </span>
+               <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                 <a class="dropdown-item" href="newinj.html">INJ</a>
+                 <a class="dropdown-item" href="newblow.html">BLOW</a>
+               </div>
+           </h5>
+           <table class="table table-bordered table-sm fullwidth table-hover">
+            <thead>
+              <tr>
+                <th colspan="2" class="table-light" style="border-right-color:black">{{dnav.year}}/{{dnav.month}}</th>
+                <th :colspan="len_inj*2" class="table-active" style="text-align:center;border-color:black">INJ</th>
+                <th rowspan="3" style="width:0%;background-color:black;border-color:black;border-width:1;margin:0;padding:0"></th>
+                <th :colspan="len_blow*2+len_jusi" class="table-dark" style="text-align:center">BLOW</th>
+              </tr>
+              <tr>
+                <th rowspan="2" scope="col" class="table-light">日</th>
+                <th rowspan="2" scope="col"class="table-light"style="border-right-color:black">曜</th>
+                   <th v-for="(mc,i) in injmachine" rowspan="2" colspan="2" scope="col" class="table-active" style="border-right-color:black">{{mc.dispname}}</th>
+                   <th v-for="(mc,i) in blowmachine"rowspan="2" colspan="2" scope="col" class="table-dark">{{mc.dispname}}</th>
+                <th :colspan="len_jusi" scope="col" class="table-dark">樹脂型</th>
+              </tr>
+              <tr>
+                 <th class="table-dark" v-for="js in jusigata">{{js.dispname}}</th>
+              </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(cal,i) in blowinjcal" :style="{backgroundColor:cal.holcolor}">
+                  <td scope="row">{{cal.day}}</td>
+                  <td style="border-right-color:black">{{cal.weekday}}</td>
+                      <td v-for="(bc,kk) in cal.listforinj" style="" @click="newinj_calendar(i,kk)"
+                       :style="{backgroundColor:bc.color,'border-right-color':calendar_b1(kk),'border-right-width':calendar_b2(kk)}">
+                        <span v-if="bc.name=='エラー'||bc.name=='競合'">{{bc.disp}}</span>
+                        <span v-else><a v-on:click="edit_injs(bc.id)" href="editinj.html"class="text-dark">{{bc.disp}}</a></span>
+                      </td>
+                  <td style="width:0%;background-Color:black;border-color:black;border-width:1;margin:0;padding:0"></td>
+                  <td v-for="(bc,kk) in cal.listforblow" style="" @click="newblow_calendar(i,kk)"
+                    :style="{backgroundColor:bc.color,'border-right-color':calendar_b1(kk),'border-right':calendar_b2(kk)}">
+                    <span v-if="bc.name=='エラー'||bc.name=='競合'">{{bc.disp}}</span>
+                    <span v-else><a v-on:click="edit_blows(bc.id)" href="editblow.html" class="text-dark">{{bc.disp}}</a></span>
+                  </td>
+                  <td v-for="(bc,kk) in cal.listforjusigata" :style="{backgroundColor:bc}"> </td>
+                </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th rowspan="2" class="table-light">日</th>
+                <th rowspan="2" class="table-light"style="border-right-color:black">曜</th>
+
+                 <th v-for="(mc,i) in injmachine" rowspan="2" colspan="2" class="table-active" style="border-color:black">{{mc.dispname}}</th>
+
+                <th rowspan="2" style="width:0%;background-color:black;border-color:black;border-width:1;margin:0;padding:0"></th>
+                   <th v-for="(mc,i) in blowmachine" rowspan="2" colspan="2"  class="table-dark">{{mc.dispname}}</th>
+                 <th v-for="js in jusigata" class="table-dark">{{js.dispname}}</th>
+              </tr>
+              <tr>
+                <th colspan="2" class="table-dark">樹脂型</th>
+              </tr>
+              </tfoot>
+           </table>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--BLOW tab -->
+  <div class="tab-pane fade" id="pills-blow" role="tabpanel" aria-labelledby="pills-blow-tab">
+    <div class="container-fluid small">
+    <div class="row">
+    <!-- BLOW予定一覧 -->
+    <div class="col-lg-5 d-block" >
+      <div class="row">
+        <div class="col-lg-12 table-responsive pl-0 pr-0 " >
+          <h5 class="h5 text-center">BLOW予定一覧
+            <a href="newinj.html"class="text-dark" id="newinj3"data-toggle="tooltip" data-placement="top" title="予定を追加" >
+              <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+            </a>
+          </h5>
+          <table class="table table-sm fullwidth table-bordered table-hover">
+           <thead class="thead-light">
+            <tr>
+              <th scope="col">マシン</th>
+              <th scope="col">No.</th>
+              <th scope="col">担当</th>
+              <th scope="col">案件</th>
+              <th scope="col">PF形状</th>
+              <th scope="col">必要数</th>
+              <th scope="col">開始</th>
+              <th scope="col">終了</th>
+              <th scope="col">樹脂型</th>
+              <th scope="col">工場PF</th>
+            </tr>
+           </thead>
+           <tbody>
+               <tr v-for="(bl,i) in blowlist" :class="bl.aclass"@click="newblow_list(i)">
+                 <td scope="row" class="text-dark"
+                     :rowspan="bl.rows"
+                     v-if="!i? true:blowlist[i-1].machine==bl.machine? '':true"
+                     v-text="bl.machine"></td>
+                 <td :style="{backgroundColor:bl.color}">
+                   <a v-on:click="edit_blows(bl.id)" href="editblow.html" :class="bl.aclass">{{bl.number}}</a>
+                 </td>
+                 <td><a v-on:click="edit_blows(bl.id)" href="editblow.html" :class="bl.aclass">{{bl.name}}</a></td>
+                 <td><a v-on:click="edit_blows(bl.id)" href="editblow.html" :class="bl.aclass">{{bl.summary}}</a></td>
+                 <td>{{bl.PFgeom}}</td>
+                 <td>{{bl.PFnum}}</td>
+                 <td>{{bl.start_date}}</td>
+                 <td>{{bl.end_date}}</td>
+                 <td>{{bl.plamold}}</td>
+                 <td>{{bl.plantPF}}</td>
+               </tr>
+           </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- BLOW予定表 -->
+    <div class="col-lg-7" >
+     <div class="row">
+      <div class="col-lg-12 table-responsive pl-0 pr-0 " >
+       <h5 class="h5 text-center">BLOW予定表
+         <a href="newblow.html"class="text-dark" id="newblow4"data-toggle="tooltip" data-placement="top" title="予定を追加" >
+           <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+         </a>
+       </h5>
+       <table class="table table-bordered table-sm fullwidth table-hover">
+        <thead>
+          <tr>
+            <th colspan="2" class="table-dark" style="border-right-color:black">{{dnav.year}}/{{dnav.month}}</th>
+            <th :colspan="len_blow*2+len_jusi" class="table-dark" style="text-align:center">BLOW</th>
+          </tr>
+          <tr>
+            <th rowspan="2" scope="col" class="table-dark">日</th>
+            <th rowspan="2" scope="col"class="table-dark"style="border-right-color:black">曜</th>
+               <th v-for="(mc,i) in blowmachine"rowspan="2" colspan="2" scope="col" class="table-dark">{{mc.dispname}}</th>
+            <th :colspan="len_jusi" scope="col" class="table-dark">樹脂型</th>
+          </tr>
+          <tr>
+             <th class="table-dark" v-for="js in jusigata">{{js.dispname}}</th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(cal,i) in blowinjcal" :style="{backgroundColor:cal.holcolor}">
+              <td scope="row">{{cal.day}}</td>
+              <td style="border-right-color:black">{{cal.weekday}}</td>
+              <td v-for="(bc,kk) in cal.listforblow" style=""@click="newblow_calendar(i,kk)"
+                :style="{backgroundColor:bc.color,'border-right-color':calendar_b1(kk),'border-right':calendar_b2(kk)}">
+                <span v-if="bc.name=='エラー'||bc.name=='競合'">{{bc.disp}}</span>
+                <span v-else v-on:click="edit_blows(bc.id)" href="editblow.html" class="text-dark">{{bc.disp}}</span>
+              </td>
+              <td v-for="(bc,kk) in cal.listforjusigata" :style="{backgroundColor:bc}"> </td>
+            </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th rowspan="2" class="table-dark">日</th>
+            <th rowspan="2" class="table-dark"style="border-right-color:black">曜</th>
+            <th v-for="(mc,i) in blowmachine" rowspan="2" colspan="2" class="table-dark">{{mc.dispname}}</th>
+            <th v-for="js in jusigata" class="table-dark">{{js.dispname}}</th>
+          </tr>
+          <tr>
+            <th :colspan="len_jusi" class="table-dark">樹脂型</th>
+          </tr>
+          </tfoot>
+       </table>
+      </div>
+     </div>
+    </div>
+    </div>
+    </div>
+  </div>
+  <!--INJ tab -->
+  <div class="tab-pane fade" id="pills-inj" role="tabpanel" aria-labelledby="pills-inj-tab">
+   <div class="container-fluid small">
+   <div class="row">
+    <!-- INJ予定一覧 -->
+    <div class="col-lg-5 d-block" >
+      <div class="row">
+        <div class="col-lg-12 table-responsive pl-0 pr-0 ">
+          <h5 class="h5 text-center">INJ予定一覧
+            <a href="newinj.html"class="text-dark" id="newblow3"data-toggle="tooltip" data-placement="top" title="予定を追加" >
+              <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+            </a>
+          </h5>
+        <table class="table table-sm fullwidth table-bordered table-hover">
+         <thead class="thead-light">
+          <tr>
+            <th scope="col">マシン</th>
+            <th scope="col">No.</th>
+            <th scope="col">担当</th>
+            <th scope="col">案件</th>
+            <th scope="col">開始</th>
+            <th scope="col">終了</th>
+          </tr>
+         </thead>
+         <tbody>
+             <tr v-for="(bl,i) in injlist" :class="bl.aclass"@click="newinj_list(i)">
+               <td scope="row" class="text-dark"
+                   :rowspan="bl.rows"
+                   v-if="!i? true:injlist[i-1].machine==bl.machine? '':true"
+                   v-text="bl.machine"></td>
+               <td :style="{backgroundColor:bl.color}">
+                 <a v-on:click="edit_injs(bl.id)" href="editinj.html" :class="bl.aclass">{{bl.number}}</a>
+               </td>
+               <td><a v-on:click="edit_injs(bl.id)" href="editinj.html" :class="bl.aclass">{{bl.name}}</a></td>
+               <td><a v-on:click="edit_injs(bl.id)" href="editinj.html" :class="bl.aclass">{{bl.summary}}</a></td>
+               <td>{{bl.start_date}}</td>
+               <td>{{bl.end_date}}</td>
+             </tr>
+         </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <!-- INJ予定表 -->
+    <div class="col-lg-7" >
+      <div class="row">
+      <div class="col-lg-12 table-responsive pl-0 pr-0 " >
+       <h5 class="h5 text-center">INJ予定表
+         <a href="newinj.html"class="text-dark" id="newblow4"data-toggle="tooltip" data-placement="top" title="予定を追加" >
+           <i class="fa fa-plus-circle" aria-hidden="true"> </i>
+         </a>
+       </h5>
+       <table class="table table-bordered table-sm fullwidth table-hover">
+        <thead>
+          <tr>
+            <th colspan="2" class="table-dark" style="border-right-color:black">{{dnav.year}}/{{dnav.month}}</th>
+            <th :colspan="len_inj*2" class="table-dark text-center" >INJ</th>
+          </tr>
+          <tr>
+            <th rowspan="1" scope="col" class="table-dark">日</th>
+            <th rowspan="1" scope="col"class="table-dark"style="border-right-color:black">曜</th>
+               <th v-for="(mc,i) in injmachine" rowspan="1" colspan="2" scope="col" class="table-dark">{{mc.dispname}}</th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(cal,i) in blowinjcal" :style="{backgroundColor:cal.holcolor}">
+              <td scope="row">{{cal.day}}</td>
+              <td style="border-right-color:black">{{cal.weekday}}</td>
+                  <td v-for="(bc,kk) in cal.listforinj" style=""@click="newinj_calendar(i,kk)"
+                   :style="{backgroundColor:bc.color,'border-right-color':calendar_b1(kk),'border-right-width':calendar_b2(kk)}">
+                   <span v-if="bc.name=='エラー'||bc.name=='競合'">{{bc.disp}}</span>
+                   <span v-on:click="edit_injs(bc.id)" href="editinj.html" class="text-dark">{{bc.disp}}</span>
+                  </td>
+            </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th rowspan="1" class="table-dark">日</th>
+            <th rowspan="1" class="table-dark"style="border-right-color:black">曜</th>
+             <th v-for="(mc,i) in injmachine" rowspan="1" colspan="2" class="table-dark">{{mc.dispname}}</th>
+          </tr>
+          </tfoot>
+       </table>
+      </div>
+      </div>
+    </div>
+   </div>
+   </div>
+   </div>
+</div>
+</div>
+<!-- 予定編集モーダル -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+ <div class="modal-dialog">
+   <div class="modal-content">
+     <div class="modal-header">
+       <h6 class="modal-title" id="exampleModalLabel">予定編集</h6>
+       <button type="button" class="close" data-dismiss="modal" aria-label="閉じる"tabindex="-1">
+         <span aria-hidden="true">&times;</span>
+       </button>
+     </div>
+     <div class="modal-body">
+       <p>予定一覧あるいは予定表から編集・削除したい予定を選択してください。</p>
+     </div>
+     <div class="modal-footer">
+       <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+     </div><!-- /.modal-footer -->
+   </div><!-- /.modal-content -->
+ </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- フッター -->
+<footer>
+    <p class="text-center small">© All rights reserved by TSK & MPG.</p>
+</footer>
+
+    <!-- オプションのJavaScript -->
+    <!-- 最初にjQuery、次にPopper.js、次にBootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
+    // 新規予定
+    $("a[id^=newblow]").click(function(){
+        window.open('newblow.html','_blank','width=600,height=750,scrollbars=1,location=0,menubar=0,toolbar=0,status=1,directories=0,resizable=1,left='+(window.screen.width-600)/2+',top='+(window.screen.height-700)/4);
+        return false;
+    });
+    $("a[id^=newinj]").click(function(){
+        window.open('newinj.html','_blank','width=600,height=750,scrollbars=1,location=0,menubar=0,toolbar=0,status=1,directories=0,resizable=1,left='+(window.screen.width-600)/2+',top='+(window.screen.height-700)/4);
+        return false;
+    });
+    // タブ
+    $(document).ready(async function(){
+//        let val = await eel.GetTabState()();
+        let val = await window.api.invoke("GetTabState")
+//        let chi = ['blowinj','blow','inj'];
+        let chi = val + 1
+//        let tabid = '#pills-tab a[href="#pills-'+ chi[val] +'"]';
+        let tabid = '#pills-tab li:nth-child('+ chi +') a';
+        $(tabid).tab('show'); // Select tab by name
+    });
+    // 予定編集リンク作成
+     $(document).on('click', '.tab-content a', function() {
+     let val = $(this).attr("href");
+     const fn = function(){
+       window.open(val,'_blank','width=600,height=750,scrollbars=1,location=0,menubar=0,toolbar=0,status=1,directories=0,resizable=1,left='+(window.screen.width-600)/2+',top='+(window.screen.height-700)/4)
+     }
+     setTimeout(fn,100);
+     return false;
+    });
+    // ホーム
+    async function button_home(){
+//      let val = await eel.PostDateNavi('',0)()
+      let val = await window.api.invoke("PostDateNavi",{date:"",tabs:0})
+    }
+    // 予定印刷
+    async function printPDF(){
+//      let val = await eel.GetPDF()((res) => {
+      let val = await window.api.invoke("GetPDF")
+      .then((res)=>{
+        const fn = function(){
+          window.open(res,'_blank','scrollbars=1,location=0,menubar=0,toolbar=0,status=1,directories=0,resizable=1')
+        }
+        setTimeout(fn,100)
+      })
+      .catch((err)=>{
+        alert(err)
+      })
+    }
+    // 子ウインドウからの更新処理
+    window.addEventListener('message', (e) => {
+      window.location.reload()
+    })
+  </script>
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="js/mainvue.js"></script>
+
+</body>
+</html>

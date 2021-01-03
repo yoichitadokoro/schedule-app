@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.0/spectrum.min.css">
+    <title>管理ページ</title>
+    <style>
+      .fullwidth{width:100%;}
+    </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+     <a class="navbar-brand" href="main.html" onclick="button_home()">成形試作予定表</a>
+     <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="ナビゲーションの切替">
+      <span class="navbar-toggler-icon"></span>
+     </button>
+     <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="main.html" onclick="button_home()">ホーム <span class="sr-only">(現位置)</span></a>
+        </li>
+        <li class="nav-item dropdown">
+         <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">新規予定</a>
+         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+           <a class="dropdown-item" href="#" id="newblow">BLOW</a>
+           <a class="dropdown-item" href="#" id="newinj">INJ</a>
+         </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="modal" href="#editModal">予定編集</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="printPDF()">予定表印刷</a>
+        </li>
+      </ul>
+      <span class="navbar-text">
+         <a class="nav-link" href="staff.html">管理ページ</a>
+      </span>
+     </div>
+    </nav>
+  </header>
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12">
+      <h2>ボタンを押すとデータベースを初期化します</h2>
+      <p class="text-center">
+        <button class="btn btn-danger btn-lg" id="reset">初期化</button>
+      </p>
+    </div>
+  </div>
+</div>
+<!-- 予定編集モーダル -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+ <div class="modal-dialog">
+   <div class="modal-content">
+     <div class="modal-header">
+       <h6 class="modal-title" id="exampleModalLabel">予定編集</h6>
+       <button type="button" class="close" data-dismiss="modal" aria-label="閉じる">
+         <span aria-hidden="true">&times;</span>
+       </button>
+     </div>
+     <div class="modal-body">
+       <p>予定一覧あるいは予定表から編集・削除したい予定を選択してください。</p>
+     </div>
+     <div class="modal-footer">
+       <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+     </div><!-- /.modal-footer -->
+   </div><!-- /.modal-content -->
+ </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- フッター -->
+<footer>
+<p class="text-center small">© All rights reserved by TSK & MPG.</p>
+</footer>
+
+<!-- オプションのJavaScript -->
+<!-- 最初にjQuery、次にPopper.js、次にBootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+<script type="text/javascript">
+// ホーム
+async function button_home(){
+//      let val = await eel.PostDateNavi('',0)()
+  let val = await window.api.invoke("PostDateNavi",{date:"",tabs:0})
+}
+// 予定印刷
+async function printPDF(){
+//      let val = await eel.GetPDF()((res) => {
+  let val = await window.api.invoke("GetPDF")
+  .then((res)=>{
+    const fn = function(){
+      window.open(res,'_blank','scrollbars=1,location=0,menubar=0,toolbar=0,status=1,directories=0,resizable=1')
+    }
+    setTimeout(fn,100)
+  })
+  .catch((err)=>{
+    alert(err)
+  })
+}
+// 子ウインドウからの更新処理
+window.addEventListener('message', (e) => {
+  window.location.reload()
+})
+$('#reset').on("click", async function() {
+  if(window.confirm("初期化してよろしいですか？")){
+    let val = await window.api.invoke("ResetDB")
+    .then((res)=>{
+    alert("初期化しました")
+  })
+    .catch((err)=>{
+    alert("失敗しました"+err)
+  })
+  }
+})
+</script>
+<!-- Vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</body>
+</html>
