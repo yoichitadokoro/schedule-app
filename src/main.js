@@ -11,7 +11,8 @@ function createWindow () {
       nodeIntegration: false,
       contextIsolation: true,
       preload: __dirname + '/preload.js'
-    }
+    },
+    'icon': __dirname + '/aiib8-5q66n-001.ico',
   })
 
   // and load the index.html of the app.
@@ -19,6 +20,59 @@ function createWindow () {
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+  const templateMenu = [
+    {
+        label: 'ファイル',
+        submenu: [
+            {
+                role: 'quit',
+            },
+        ]
+    },
+    {
+        label: '編集',
+        submenu: [
+            {
+                role: 'undo',
+            },
+            {
+                role: 'redo',
+            },
+        ]
+    },
+    {
+        label: '表示',
+        submenu: [
+            {
+                label: 'Reload',
+                accelerator: 'CmdOrCtrl+R',
+                click(item, focusedWindow){
+                    if(focusedWindow) focusedWindow.reload()
+                },
+            },
+            {
+                type: 'separator',
+            },
+            {
+                role: 'resetzoom',
+            },
+            {
+                role: 'zoomin',
+            },
+            {
+                role: 'zoomout',
+            },
+            {
+                type: 'separator',
+            },
+            {
+                role: 'togglefullscreen',
+            }
+        ]
+    }
+  ]
+  const menu = Menu.buildFromTemplate(templateMenu);
+  Menu.setApplicationMenu(menu);
 }
 
 // This method will be called when Electron has finished
