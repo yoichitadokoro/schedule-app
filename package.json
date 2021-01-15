@@ -5,12 +5,17 @@
   "author": "YoichiTadokoro",
   "license": "MIT",
   "devDependencies": {
+    "bootstrap": "^4.5.3",
     "date-utils": "^1.2.21",
     "electron": "11.0.0",
     "electron-builder": "^22.9.1",
+    "font-awesome": "^4.7.0",
     "fs": "^0.0.1-security",
+    "jquery": "^3.5.1",
+    "nedb": "^1.8.0",
     "path": "^0.12.7",
     "pdfmake": "^0.1.69",
+    "popper.js": "^1.16.1",
     "sqlite3": "^5.0.0",
     "vue": "^2.6.12"
   }

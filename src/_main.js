@@ -99,8 +99,6 @@ app.on('window-all-closed', function () {
 // code. You can also put them in separate files and require them here.
 const Sqlite = require('./sqlite.js')
 const sq = new Sqlite()
-const Nedb = require('./nedb.js')
-const ne = new Nedb()
 const listdays = 37
 const fpdf = "schedule_print.pdf"
 let datenav = new Date()
@@ -126,7 +124,6 @@ ipcMain.handle("DateNavi", async (event, arg) => {
     'month':datenav.getMonth()+1,
     'tabs':tabs,
   }
-  await ne.inserttest()
   return context
 });
 ipcMain.handle("PostDateNavi", async (event, arg) => {
