@@ -1,8 +1,17 @@
+const {ipcRenderer} = require('electron')
+
+$(function(){
+  $('#button_success').on('click', function() {
+      window.opener.postMessage('message')
+      window.close();
+  })
+})
+
 var new_inj_schedule = new Vue({
   el: '#new_inj',
   async mounted(){
 //    await eel.GetInjMachine()((res) => {
-    await window.api.invoke("GetInjMachine")
+    await ipcRenderer.invoke("GetInjMachine")
     .then((res)=>{
       this.res = res
     })
@@ -10,7 +19,7 @@ var new_inj_schedule = new Vue({
       alert(err)
     })
 //    await eel.getTodayVue()((today) => {
-/*    await window.api.invoke("getTodayVue")
+/*    await ipcRenderer.invoke("getTodayVue")
     .then((today)=>{
       this.start_date = today;
       this.end_date = today;
@@ -18,7 +27,7 @@ var new_inj_schedule = new Vue({
     .catch((err)=>{
       alert(err)
     })*/
-    await window.api.invoke("getInitialVue")
+    await ipcRenderer.invoke("getInitialVue")
     .then((res)=>{
       this.start_date = res.date
       this.end_date = res.date
@@ -69,7 +78,7 @@ var new_inj_schedule = new Vue({
         this.m_name = this.res[this.injmachine-1];
       }
 //      await eel.CheckNewInj(this.injmachine,this.start_date,this.end_date)((res) => {
-      await window.api.invoke("CheckNewInj",{machine:this.injmachine,sdate:this.start_date,fdate:this.end_date})
+      await ipcRenderer.invoke("CheckNewInj",{machine:this.injmachine,sdate:this.start_date,fdate:this.end_date})
       .then((res)=>{
         this.warn = res
         if(res.length > 0){
@@ -84,7 +93,7 @@ var new_inj_schedule = new Vue({
       const now = new Date()
       const datalist = [this.injmachine,this.name,this.summary,this.start_date,this.end_date,this.color,this.result,now.toString()];
 //      await eel.NewInjSchedule(datalist)((res) => {
-      await window.api.invoke("NewInjSchedule",datalist)
+      await ipcRenderer.invoke("NewInjSchedule",datalist)
       .then((res)=>{
         if(res == 1){
           this.pstep = 2;
@@ -101,6 +110,16 @@ var new_inj_schedule = new Vue({
     },
     dataChanged(){
       this.warn_flag = 0;
+    },
+    plus_day_sdate(){
+      let d = new Date(this.start_date)
+      d.setDate(d.getDate()+1)
+      this.start_date = d.getFullYear() + '-' + ('00'+(d.getMonth()+1)).slice(-2) + '-' + ('00'+d.getDate()).slice(-2)
+    },
+    minus_day_sdate(){
+      let d = new Date(this.start_date)
+      d.setDate(d.getDate()-1)
+      this.start_date = d.getFullYear() + '-' + ('00'+(d.getMonth()+1)).slice(-2) + '-' + ('00'+d.getDate()).slice(-2)
     },
   }
 })
